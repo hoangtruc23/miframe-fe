@@ -35,7 +35,7 @@ function DeviceManagement() {
 
     const fetchData = useCallback(async () => {
         try {
-            const res = await DeviceService.getAll({ status: statusDevice })
+            const res = await DeviceService.getAll(new URLSearchParams({ status: statusDevice }).toString())
             if (res.status === 200) {
                 setDevices(res.data)
             }

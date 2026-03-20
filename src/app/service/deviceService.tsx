@@ -10,6 +10,14 @@ export const DeviceService = {
 
         return res.json()
     },
+    async getAvailableDevices(query: string) {
+        const res = await fetch(this.urlApi + "/getAvailableDevices/?" + new URLSearchParams(query))
+        if (!res.ok) {
+            throw new Error("Lấy danh sách máy thất bại")
+        }
+
+        return res.json()
+    },
     async create(data: unknown) {
         const res = await fetch(this.urlApi + "/create", {
             method: "POST",
@@ -40,8 +48,5 @@ export const DeviceService = {
 
         return res.json()
     },
-
-
-
 
 }

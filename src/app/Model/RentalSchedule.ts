@@ -3,7 +3,7 @@ import DeviceModel from "@/app/Model/Device";
 
 type RentalScheduleModel = {
   _id: string;
-  deviceId: [DeviceModel];
+  deviceIds: [DeviceModel];
   startRental: string;
   endRental: string;
   customerId: CustomerModel;
