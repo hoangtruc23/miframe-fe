@@ -11,7 +11,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus } from 'lucide-react'
+import { Edit2, Plus, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { DeviceService } from '@/app/service/deviceService'
 import {
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import DeviceModel from '@/app/Model/Device'
 import { toast } from 'sonner'
+import StatusBadge from '@/app/(components)/StatusBadge'
 
 
 function DeviceManagement() {
@@ -111,7 +112,7 @@ function DeviceManagement() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-6">
+            <div className="md:flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold">Quản lý thiết bị</h1>
 
                 <Button className="gap-2" onClick={handleOpenCreate}>
@@ -261,54 +262,70 @@ function DeviceManagement() {
 
             {/* ================= TABLE ================= */}
             <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Mã máy</TableHead>
-                            <TableHead>Dòng máy</TableHead>
-                            <TableHead>Tên thiết bị</TableHead>
-                            <TableHead>Giá mua</TableHead>
-                            <TableHead>Giá thuê</TableHead>
-                            <TableHead>Trạng thái</TableHead>
-                            <TableHead>Ghi chú</TableHead>
-                            <TableHead className="text-center">Hành động</TableHead>
-                        </TableRow>
-                    </TableHeader>
-
-                    <TableBody>
-                        {devices.map((device) => (
-                            <TableRow key={device._id}>
-                                <TableCell>{device.code}</TableCell>
-                                <TableCell>{device.model}</TableCell>
-                                <TableCell>{device.name}</TableCell>
-                                <TableCell>{device.priceBuy?.toLocaleString()}</TableCell>
-                                <TableCell>{device.priceRental?.toLocaleString()}</TableCell>
-                                <TableCell>{device.status === "available" ? "Sẵn sàng" : device.status === "rented" ? "Đang cho thuê" : "Bảo trì"}</TableCell>
-                                <TableCell>{device.note}</TableCell>
-
-                                <TableCell>
-                                    <div className="flex justify-center gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleOpenEdit(device)}
-                                        >
-                                            Edit
-                                        </Button>
-
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-red-500"
-                                        >
-                                            Delete
-                                        </Button>
-                                    </div>
-                                </TableCell>
+                {/* --- GIAO DIỆN TABLE (Chỉ hiện từ màn hình sm trở lên) --- */}
+                <div className="hidden md:block">
+                    <Table>
+                        <TableHeader className="bg-slate-50">
+                            <TableRow>
+                                <TableHead>Thiết bị</TableHead>
+                                <TableHead>Dòng máy</TableHead>
+                                <TableHead>Giá thuê</TableHead>
+                                <TableHead>Trạng thái</TableHead>
+                                <TableHead>Ghi chú</TableHead>
+                                <TableHead className="text-right">Hành động</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {devices.map((device) => (
+                                <TableRow key={device._id}>
+                                    <TableCell>
+                                        <div className="font-bold">{device.code}</div>
+                                        <div className="text-xs text-slate-500">{device.name}</div>
+                                    </TableCell>
+                                    <TableCell>{device.model}</TableCell>
+                                    <TableCell className="font-medium">{device.priceRental?.toLocaleString()}đ</TableCell>
+                                    <TableCell>
+                                        <StatusBadge status={device.status || ''} />
+                                    </TableCell>
+                                    <TableCell>
+                                        {device.note}
+                                    </TableCell>
+                                    <TableCell className="text-right text-nowrap">
+                                        <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(device)}><Edit2 className="w-4 h-4" /></Button>
+                                        <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+
+                {/* --- GIAO DIỆN MOBILE CARD --- */}
+                <div className="md:hidden divide-y">
+                    {devices.map((device) => (
+                        <div key={device._id} className="p-4 space-y-2">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">{device.code}</span>
+                                    <h3 className="font-bold text-slate-900">{device.name}</h3>
+                                </div>
+                                <StatusBadge status={device.status || ''} />
+                            </div>
+
+                            <div className="text-sm text-slate-500">Giá thuê: <span className="text-blue-600 font-semibold">{device.priceRental?.toLocaleString()}đ</span></div>
+                            <div className="text-sm text-slate-500">{device.note || ''}</div>
+
+                            <div className="flex gap-2 pt-2">
+                                <Button variant="outline" className="flex-1 h-9" onClick={() => handleOpenEdit(device)}>
+                                    <Edit2 className="w-4 h-4 mr-2" /> Sửa
+                                </Button>
+                                <Button variant="outline" className="flex-1 h-9 text-red-500 border-red-100 bg-red-50">
+                                    <Trash2 className="w-4 h-4 mr-2" /> Xóa
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )

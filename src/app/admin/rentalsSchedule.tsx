@@ -43,6 +43,7 @@ import { RentalService } from '@/app/service/rentalService'
 import { DeviceService } from '@/app/service/deviceService'
 import { toast } from 'sonner'
 import RentalScheduleModel from '@/app/Model/RentalSchedule'
+import StatusBadge from '@/app/(components)/StatusBadge';
 
 type RentalStatus = 'deposit' | 'appointment' | 'rented' | 'completed' | 'canceled';
 
@@ -85,7 +86,7 @@ function RentalSchedule() {
     const [statusDevices, setStatusDevices] = useState("")
     const [selectedItem, setSelectedItem] = useState<RentalScheduleModel | null>(null)
     const [availableDevices, setAvailableDevices] = useState<DeviceModel[]>([]);
-
+    const [filterStatus, setFilterStatus] = useState('')
     // Lưu danh sách thiết bị đang được chọn trong Form
     const [selectedDeviceList, setSelectedDeviceList] = useState<SelectedDevice[]>([])
 
@@ -149,7 +150,7 @@ function RentalSchedule() {
     const fetchDataRental = useCallback(async () => {
         setIsLoading(true);
         try {
-            const res = await RentalService.getAll()
+            const res = await RentalService.getAll(new URLSearchParams({ status: filterStatus }).toString())
             setRentals(res.data)
         } catch (error) {
             toast.error("Lỗi tải danh sách lịch thuê. Vui lòng thử lại.")
@@ -157,7 +158,7 @@ function RentalSchedule() {
         } finally {
             setIsLoading(false);
         }
-    }, [])
+    }, [filterStatus])
 
     const fetchDataDevices = useCallback(async () => {
         try {
@@ -283,34 +284,31 @@ function RentalSchedule() {
         }
     };
 
-    const handleDeleteRental = async (id: string) => {
-        setDeleteConfirmId(null);
-        setIsLoading(true);
-        try {
-            // const res = await RentalService.delete(id);
-            // if (res.status === 200 || res.success) {
-            //     toast.success(res.message || "Xoá đơn thuê thành công");
-            //     fetchDataRental();
-            // } else {
-            //     toast.error(res.message || "Không thể xoá đơn thuê");
-            // }
-        } catch (error) {
-            console.error(error);
-            toast.error("Lỗi khi xoá. Vui lòng thử lại.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     return (
         <div className="p-6 space-y-6 bg-slate-50/50 min-h-screen">
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="md:flex items-center justify-between">
+                <div className="mb-2">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Quản lý lịch thuê</h1>
                 </div>
                 <Button className="gap-2" onClick={handleOpenAdd}>
                     <Plus className="w-4 h-4" /> Thêm lịch thuê
                 </Button>
+            </div>
+
+            <div className="my-2">
+                <span className="text-sm font-medium text-gray-600 mx-2">Lọc theo trạng thái</span>
+                <select
+                    className="border rounded-lg px-3 py-2 text-sm bg-white"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                    <option value="">Tất cả</option>
+                    <option value="completed">Hoàn thành</option>
+                    <option value="rented">Đang cho thuê</option>
+                    <option value="deposit">Đặt cọc</option>
+                    <option value="appointment">Hẹn lịch</option>
+                    <option value="canceled">Đã hủy</option>
+                </select>
             </div>
 
             <Dialog open={open} onOpenChange={setOpen}>
@@ -442,8 +440,6 @@ function RentalSchedule() {
                         </DialogFooter>
                     </form>
                 </DialogContent>
-
-
             </Dialog>
 
             <div className="grid grid-cols-1 gap-4 lg:hidden">
@@ -456,16 +452,15 @@ function RentalSchedule() {
                         <div key={rental._id} className="bg-white p-4 rounded-xl border shadow-sm space-y-3">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <div className="text-sm font-bold text-blue-600">
-                                        {moment(rental.startRental).format('HH:mm DD/MM')} - {moment(rental.endRental).format('HH:mm DD/MM')}
+                                    <div className="flex flex-col text-sm font-bold ">
+                                        <span className="text-blue-400">{moment(rental.startRental).format('HH:mm DD/MM')}</span>
+                                        <span className="text-blue-700">{moment(rental.endRental).format('HH:mm DD/MM')}</span>
                                     </div>
                                     <div className="text-lg font-bold mt-1">{rental.customerId?.name || 'N/A'}</div>
+                                    <div className="text-sm">{rental.customerId?.phone || '-'}</div>
                                 </div>
-                                {rental.status && statusConfig[rental.status as RentalStatus] && (
-                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase ${statusConfig[rental.status as RentalStatus].color}`}>
-                                        {statusConfig[rental.status as RentalStatus].label}
-                                    </span>
-                                )}
+
+                                <StatusBadge status={rental.status || ''} />
                             </div>
 
                             <div className="flex flex-wrap gap-1.5 py-2 border-y border-dashed">
@@ -542,11 +537,7 @@ function RentalSchedule() {
                                     </TableCell>
                                     <TableCell className="font-bold text-blue-600">{rental.total?.toLocaleString()}đ</TableCell>
                                     <TableCell>
-                                        {rental.status && statusConfig[rental.status as RentalStatus] ? (
-                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${statusConfig[rental.status as RentalStatus].color}`}>
-                                                {statusConfig[rental.status as RentalStatus].label}
-                                            </span>
-                                        ) : '---'}
+                                        <StatusBadge status={rental.status || ''} />
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-1">
@@ -560,28 +551,6 @@ function RentalSchedule() {
                     </TableBody>
                 </Table>
             </div>
-
-            {/* Delete Confirmation Dialog */}
-            <AlertDialog open={deleteConfirmId !== null} onOpenChange={(isOpen) => !isOpen && setDeleteConfirmId(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Xác nhận xoá</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Bạn có chắc muốn xoá đơn thuê này? Hành động này không thể hoàn tác.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isLoading}>Huỷ</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => deleteConfirmId && handleDeleteRental(deleteConfirmId)}
-                            disabled={isLoading}
-                            className="bg-red-600 hover:bg-red-700"
-                        >
-                            {isLoading ? "Đang xoá..." : "Xoá"}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     )
 }

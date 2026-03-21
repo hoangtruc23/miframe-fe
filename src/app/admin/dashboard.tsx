@@ -22,7 +22,6 @@ export default function DashboardPage() {
     useEffect(() => {
         const fetchDashboard = async () => {
             try {
-                // Gọi API dashBoard bạn đã viết ở NodeJS
                 const res = await RentalService.getDashboard();
                 setData(res.data);
             } catch (error: any) {

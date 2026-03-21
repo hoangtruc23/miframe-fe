@@ -1,8 +1,4 @@
-import { environment } from "@/environments/environment"
-
 export const RentalService = {
-    // urlApi: environment.apiUrl + "rental",
-    // urlApi: process.env.NEXT_PUBLIC_API_URL + "rental",
     urlApi: `${process.env.NEXT_PUBLIC_API_URL}/rental`,
     async getDashboard() {
         const res = await fetch(this.urlApi + "/dashboard")
@@ -12,8 +8,8 @@ export const RentalService = {
 
         return res.json()
     },
-    async getAll() {
-        const res = await fetch(this.urlApi + "/getAll")
+    async getAll(query: string) {
+        const res = await fetch(this.urlApi + "/getAll?" + new URLSearchParams(query))
         if (!res.ok) {
             throw new Error("Lấy danh sách máy thất bại")
         }
