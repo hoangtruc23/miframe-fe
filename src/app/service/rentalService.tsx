@@ -1,7 +1,9 @@
 import { environment } from "@/environments/environment"
 
 export const RentalService = {
-    urlApi: environment.apiUrl + "rental",
+    // urlApi: environment.apiUrl + "rental",
+    // urlApi: process.env.NEXT_PUBLIC_API_URL + "rental",
+    urlApi: `${process.env.NEXT_PUBLIC_API_URL}/rental`,
     async getDashboard() {
         const res = await fetch(this.urlApi + "/dashboard")
         if (!res.ok) {

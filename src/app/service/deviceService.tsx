@@ -1,8 +1,10 @@
 import { environment } from "@/environments/environment"
 
 export const DeviceService = {
-    urlApi: environment.apiUrl + "device",
+    // urlApi: environment.apiUrl + "device",
+    urlApi: `${process.env.NEXT_PUBLIC_API_URL}/device`,
     async getAll(query: string) {
+        console.log(this.urlApi + "/getAll/?" + new URLSearchParams(query))
         const res = await fetch(this.urlApi + "/getAll/?" + new URLSearchParams(query))
         if (!res.ok) {
             throw new Error("Lấy danh sách máy thất bại")

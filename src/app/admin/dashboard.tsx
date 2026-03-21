@@ -27,6 +27,7 @@ export default function DashboardPage() {
                 setData(res.data);
             } catch (error: any) {
                 toast.error("Không thể tải dữ liệu dashboard");
+                console.log(error)
             } finally {
                 setLoading(false);
             }

@@ -41,6 +41,7 @@ function DeviceManagement() {
             }
         } catch (error: unknown) {
             console.error("Lỗi tải thiết bị:", (error as Error).message)
+            console.log(error)
         }
     }, [statusDevice])
 
