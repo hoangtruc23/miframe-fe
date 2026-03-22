@@ -6,6 +6,7 @@ const StatusBadge = ({ status }: { status: string }) => {
         maintenance: { label: "Bảo trì", class: "bg-amber-100 text-amber-700 border-amber-200" },
         deposit: { label: "Đặt cọc", class: "bg-amber-100 text-amber-700 border-amber-200 " },
         appointment: { label: "Hẹn lịch", class: "bg-green-100 text-green-700 border-green-200" },
+        pending: { label: "Chờ thanh toán", class: "bg-amber-100 text-amber-700 border-amber-200" },
     };
 
     const config = configs[status as keyof typeof configs] || configs.available;

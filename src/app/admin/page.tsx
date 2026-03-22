@@ -1,10 +1,12 @@
 "use client"
 import React, { useState } from 'react'
-import MenuAdmin from '@/app/admin/menu'
-import DeviceManagement from '@/app/admin/deviceManagement'
-import RentalSchedule from '@/app/admin/rentalsSchedule'
-import DashboardPage from '@/app/admin/dashboard'
+
 import { Menu, X } from 'lucide-react' // Bạn có thể dùng icon tùy ý
+import DashboardPage from '@/app/admin/Dashboard';
+import DeviceManagement from '@/app/admin/DeviceManagement';
+import RentalSchedule from '@/app/admin/RentalsSchedule';
+import MenuAdmin from '@/app/admin/Menu';
+import Expenses from '@/app/admin/Expenses';
 
 function AdminPage() {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -15,6 +17,7 @@ function AdminPage() {
             case 'dashboard': return <DashboardPage />;
             case 'devices': return <DeviceManagement />;
             case 'rentals': return <RentalSchedule />;
+            case 'expenses': return <Expenses />;
             default: return <DashboardPage />;
         }
     };

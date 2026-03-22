@@ -1,3 +1,5 @@
+import apiClient from "@/app/axios/apiClient";
+
 export const RentalService = {
     urlApi: `${process.env.NEXT_PUBLIC_API_URL}/rental`,
     async getDashboard() {
@@ -8,6 +10,12 @@ export const RentalService = {
 
         return res.json()
     },
+
+    getRentalToday: async () => {
+        const response = await apiClient.get('/rental/getRentalToday');
+        return response.data;
+    },
+
     async getAll(query: string) {
         const res = await fetch(this.urlApi + "/getAll?" + new URLSearchParams(query))
         if (!res.ok) {
@@ -46,7 +54,10 @@ export const RentalService = {
 
         return res.json()
     },
-
+    delete: async (id: string) => {
+        const response = await apiClient.get(`/rental/delete/${id}`);
+        return response.data;
+    },
 
 
 

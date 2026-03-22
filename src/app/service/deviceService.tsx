@@ -1,4 +1,3 @@
-
 export const DeviceService = {
     urlApi: `${process.env.NEXT_PUBLIC_API_URL}/device`,
     async getAll(query: string) {

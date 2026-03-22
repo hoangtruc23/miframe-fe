@@ -4,11 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, CheckCircle2, ClipboardList, TrendingUp } from "lucide-react"
 import { RentalService } from '@/app/service/rentalService'
 import { toast } from 'sonner'
+import StatusBadge from '@/app/(components)/StatusBadge'
 
 interface DashboardData {
     allTotal: number;
     completedTotal: number;
     count: number;
+}
+
+interface RentalItem {
+    name: string;
+    [key: string]: any;
 }
 
 export default function DashboardPage() {
@@ -18,6 +24,18 @@ export default function DashboardPage() {
         count: 0
     });
     const [loading, setLoading] = useState(true);
+    const [listToday, setListToday] = useState<RentalItem[]>([]);
+
+    const getRentalToday = async () => {
+        try {
+            const res = await RentalService.getRentalToday();
+            console.log(res)
+            setListToday(res);
+        } catch (error: any) {
+            toast.error("Không thể tải dữ liệu dashboard");
+            console.log(error)
+        }
+    }
 
     useEffect(() => {
         const fetchDashboard = async () => {
@@ -31,6 +49,8 @@ export default function DashboardPage() {
                 setLoading(false);
             }
         };
+
+        getRentalToday()
         fetchDashboard();
     }, []);
 
@@ -95,33 +115,41 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            {/* Bạn có thể thêm biểu đồ Chart ở đây nếu cần */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="col-span-3">
+                    <CardHeader>
+                        <CardTitle>Việc làm hôm nay</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {listToday && listToday.map((item, index) => (
+                            <div key={index} className="mb-2 border-b pb-2">
+                                <p className="font-bold">{item?.customerId?.name}</p>
+                                <div className="text-sm text-gray-500">
+                                    Thiết bị: {item?.deviceIds?.map((d: any) => d.name).join(', ')}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                    Giá: {item?.total}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                    Trạng thái: <StatusBadge status={item?.status} />
+                                </div>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+
                 <Card className="col-span-4">
                     <CardHeader>
                         <CardTitle>Biểu đồ doanh thu</CardTitle>
                     </CardHeader>
                     <CardContent className="pl-2">
-                        <div className="h-[200px] flex items-center justify-center text-slate-400 italic">
+                        <div className="h-50 flex items-center justify-center text-slate-400 italic">
                             (Chưa có dữ liệu biểu đồ)
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="col-span-3">
-                    <CardHeader>
-                        <CardTitle>Thông tin hỗ trợ</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4 text-sm">
-                            <p className="text-slate-600 font-medium">Lưu ý cho admin:</p>
-                            <ul className="list-disc pl-4 space-y-2 text-slate-500">
-                                <li>Kiểm tra các đơn hàng "Đang thuê" quá hạn.</li>
-                                <li>Xác nhận trạng thái "Hoàn thành" để cập nhật doanh thu thực.</li>
-                            </ul>
-                        </div>
-                    </CardContent>
-                </Card>
+
             </div>
         </div>
     );

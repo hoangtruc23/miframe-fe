@@ -16,7 +16,7 @@ export function HeroSection() {
                             <span className="text-sm font-medium text-foreground">Uy tín - Chất lượng - Chuyên nghiệp</span>
                         </div>
 
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight mb-6 text-primary">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6 text-primary">
                             Thuê máy ảnh
                             {/* <span className="block text-primary">Chuyen Nghiep</span> */}
                         </h1>
@@ -61,7 +61,7 @@ export function HeroSection() {
 
                     {/* Right Image */}
                     <div className="relative">
-                        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-card border border-border shadow-lg">
+                        <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-card border border-border shadow-lg">
                             <Image
                                 src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop"
                                 alt="Thiet bi may anh chuyen nghiep"

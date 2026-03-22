@@ -18,7 +18,6 @@ function RentalPage() {
                 <div className="h-1 w-20 bg-blue-500 mx-auto mt-2"></div>
             </header>
 
-            {/* Sử dụng Grid để hiển thị tốt trên cả điện thoại và máy tính */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {rentalImages.map((img, index) => (
                     <div
@@ -37,7 +36,6 @@ function RentalPage() {
                 ))}
             </div>
 
-            {/* Section bổ sung nếu cần text hỗ trợ */}
             <footer className="mt-12 text-center text-gray-500 italic">
                 <p>* Vui lòng đọc kỹ quy định trước khi ký hợp đồng thuê máy.</p>
             </footer>

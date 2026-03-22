@@ -31,7 +31,6 @@ function DeviceManagement() {
     const [devices, setDevices] = useState<DeviceModel[]>([])
     const [selectedDevice, setSelectedDevice] = useState<DeviceModel | null>(null)
     const [statusDevice, setStatusDevice] = useState('')
-    // const [filterStatus, setFilterStatus] = useState("");
     const [formData, setFormData] = useState<DeviceModel | null>(null);
 
     const fetchData = useCallback(async () => {
@@ -122,7 +121,7 @@ function DeviceManagement() {
             </div>
 
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-106">
                     <form onSubmit={handleSubmit}>
                         <DialogHeader>
                             <DialogTitle>
@@ -279,8 +278,8 @@ function DeviceManagement() {
                             {devices.map((device) => (
                                 <TableRow key={device._id}>
                                     <TableCell>
-                                        <div className="font-bold">{device.code}</div>
-                                        <div className="text-xs text-slate-500">{device.name}</div>
+                                        <div className="">{device.name}</div>
+                                        {/* <div className="font-bold text-xs">{device.code}</div> */}
                                     </TableCell>
                                     <TableCell>{device.model}</TableCell>
                                     <TableCell className="font-medium">{device.priceRental?.toLocaleString()}đ</TableCell>

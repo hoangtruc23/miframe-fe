@@ -27,16 +27,6 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import DeviceModel from '@/app/Model/Device'
 import { RentalService } from '@/app/service/rentalService'
@@ -44,6 +34,7 @@ import { DeviceService } from '@/app/service/deviceService'
 import { toast } from 'sonner'
 import RentalScheduleModel from '@/app/Model/RentalSchedule'
 import StatusBadge from '@/app/(components)/StatusBadge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 type RentalStatus = 'deposit' | 'appointment' | 'rented' | 'completed' | 'canceled';
 
@@ -86,7 +77,7 @@ function RentalSchedule() {
     const [statusDevices, setStatusDevices] = useState("")
     const [selectedItem, setSelectedItem] = useState<RentalScheduleModel | null>(null)
     const [availableDevices, setAvailableDevices] = useState<DeviceModel[]>([]);
-    const [filterStatus, setFilterStatus] = useState('')
+    const [filterStatus, setFilterStatus] = useState('rented')
     // Lưu danh sách thiết bị đang được chọn trong Form
     const [selectedDeviceList, setSelectedDeviceList] = useState<SelectedDevice[]>([])
 
@@ -284,6 +275,21 @@ function RentalSchedule() {
         }
     };
 
+    const handleDeleteRental = async (id: string) => {
+        setDeleteConfirmId(null);
+        setIsLoading(true);
+        try {
+            const res = await RentalService.delete(id);
+            toast.success(res.message || "Xoá đơn thuê thành công");
+            fetchDataRental();
+        } catch (error) {
+            console.error(error);
+            toast.error("Lỗi khi xoá. Vui lòng thử lại.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="p-6 space-y-6 bg-slate-50/50 min-h-screen">
             <div className="md:flex items-center justify-between">
@@ -335,13 +341,13 @@ function RentalSchedule() {
                                 <Input placeholder="Lưu ý..." value={formData.noteCustomer} onChange={(e) => updateField('noteCustomer', e.target.value)} />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2"><CalendarDays className="w-3 h-3 text-blue-500" /> Bắt đầu</Label>
                                     <Input required type="datetime-local" value={formData.startRental} onChange={(e) => updateField('startRental', e.target.value)} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Kết thúc</Label>
+                                    <Label><CalendarDays className="w-3 h-3 text-blue-500" /> Kết thúc</Label>
                                     <Input required type="datetime-local" value={formData.endRental} onChange={(e) => updateField('endRental', e.target.value)} />
                                 </div>
                             </div>
@@ -457,7 +463,8 @@ function RentalSchedule() {
                                         <span className="text-blue-700">{moment(rental.endRental).format('HH:mm DD/MM')}</span>
                                     </div>
                                     <div className="text-lg font-bold mt-1">{rental.customerId?.name || 'N/A'}</div>
-                                    <div className="text-sm">{rental.customerId?.phone || '-'}</div>
+                                    <div className="text-sm">{rental.customerId?.phone || ''}</div>
+                                    <div className="text-sm">{rental.customerId?.note || ''}</div>
                                 </div>
 
                                 <StatusBadge status={rental.status || ''} />
@@ -550,6 +557,28 @@ function RentalSchedule() {
                         )}
                     </TableBody>
                 </Table>
+
+                {/* Delete Confirmation Dialog */}
+                <AlertDialog open={deleteConfirmId !== null} onOpenChange={(isOpen) => !isOpen && setDeleteConfirmId(null)}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Xác nhận xoá</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Bạn có chắc muốn xoá đơn thuê này? Hành động này không thể hoàn tác.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isLoading}>Huỷ</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={() => deleteConfirmId && handleDeleteRental(deleteConfirmId)}
+                                disabled={isLoading}
+                                className="bg-red-600 hover:bg-red-700"
+                            >
+                                {isLoading ? "Đang xoá..." : "Xoá"}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     )

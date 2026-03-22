@@ -1,5 +1,4 @@
 "use client"
-import React from 'react';
 import { LayoutDashboard, Camera, CalendarDays, Users, LogOut } from 'lucide-react';
 
 interface MenuAdminProps {
@@ -13,7 +12,7 @@ function MenuAdmin({ activeTab, setActiveTab }: MenuAdminProps) {
         { id: 'devices', label: 'Thiết bị', icon: <Camera size={20} /> },
         { id: 'rentals', label: 'Lịch thuê', icon: <CalendarDays size={20} /> },
         { id: 'customers', label: 'Khách hàng', icon: <Users size={20} /> },
-        { id: 'spending', label: 'Chi tiêu', icon: <Users size={20} /> },
+        { id: 'expenses', label: 'Chi tiêu', icon: <Users size={20} /> },
     ];
 
     return (
