@@ -1,10 +1,11 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, CheckCircle2, ClipboardList, TrendingUp } from "lucide-react"
+import { DollarSign, CheckCircle2, ClipboardList, TrendingUp, Badge } from "lucide-react"
 import { RentalService } from '@/app/service/rentalService'
 import { toast } from 'sonner'
 import StatusBadge from '@/app/(components)/StatusBadge'
+import moment from 'moment'
 
 interface DashboardData {
     allTotal: number;
@@ -29,7 +30,6 @@ export default function DashboardPage() {
     const getRentalToday = async () => {
         try {
             const res = await RentalService.getRentalToday();
-            console.log(res)
             setListToday(res);
         } catch (error: any) {
             toast.error("Không thể tải dữ liệu dashboard");
@@ -37,6 +37,28 @@ export default function DashboardPage() {
         }
     }
 
+
+    const renderActionBadge = (rental: any) => {
+        const now = moment();
+
+        if (now.isSame(rental.startRental, 'day')) {
+            return (
+                <StatusBadge status={"getDevice"} />
+            );
+        }
+
+        if (now.isSame(rental.endRental, 'day')) {
+            return (
+                <StatusBadge status={"backDevice"} />
+            );
+        }
+
+        return (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-600 border border-slate-200">
+                ĐANG THUÊ
+            </span>
+        );
+    };
     useEffect(() => {
         const fetchDashboard = async () => {
             try {
@@ -115,28 +137,55 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-3">
-                    <CardHeader>
-                        <CardTitle>Việc làm hôm nay</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {listToday && listToday.map((item, index) => (
-                            <div key={index} className="mb-2 border-b pb-2">
-                                <p className="font-bold">{item?.customerId?.name}</p>
-                                <div className="text-sm text-gray-500">
-                                    Thiết bị: {item?.deviceIds?.map((d: any) => d.name).join(', ')}
+            <Card className="col-span-3">
+                <CardHeader>
+                    <CardTitle className="flex justify-between items-center">
+                        Việc làm hôm nay
+                        <span className="text-md font-bold text-slate-500">{moment().format('DD/MM/YYYY')}</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {listToday && listToday.length > 0 ? (
+                        listToday.map((item, index) => (
+                            <div key={index} className="flex flex-col gap-1 pb-3 border-b last:border-0 last:pb-0">
+                                <div className="">
+                                    {renderActionBadge(item)}
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {item?.deviceIds?.map((d: any, i: number) => (
+                                            <span key={i} className="bg-slate-100 px-1.5 py-0.5 rounded border">
+                                                {d.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <div className="font-bold">{item.customerId.name}</div>
+                                    <div className="mt-1 space-y-0.5">
+                                        <div className="flex items-center text-slate-500">
+                                            <span className="font-medium">Bắt đầu: </span>
+                                            <span>{moment(item.startRental).format('HH:mm DD-MM-YYYY')}</span>
+                                        </div>
+                                        <div className="flex items-center text-slate-500">
+                                            <span className="font-medium">Kết thúc: </span>
+                                            <span>{moment(item.endRental).format('HH:mm DD-MM-YYYY')}</span>
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                    Giá: {item?.total}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                    Trạng thái: <StatusBadge status={item?.status} />
+
+                                <div className="font-bold">
+
                                 </div>
                             </div>
-                        ))}
-                    </CardContent>
-                </Card>
+                        ))
+                    ) : (
+                        <div className="text-center py-6 text-slate-400 text-sm italic">
+                            Hôm nay chưa có lịch mới
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+
+
 
                 <Card className="col-span-4">
                     <CardHeader>

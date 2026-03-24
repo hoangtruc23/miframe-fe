@@ -89,7 +89,7 @@ function Expenses() {
         setIsSubmitting(true);
         try {
             if (selectedItem) {
-                // await ExpenseService.update(selectedItem._id, formData)
+                await expenseService.update(selectedItem._id, formData)
                 toast.success("Cập nhật thành công");
             } else {
                 await expenseService.create(formData)

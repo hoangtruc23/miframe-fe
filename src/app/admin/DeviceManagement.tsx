@@ -32,12 +32,21 @@ function DeviceManagement() {
     const [selectedDevice, setSelectedDevice] = useState<DeviceModel | null>(null)
     const [statusDevice, setStatusDevice] = useState('')
     const [formData, setFormData] = useState<DeviceModel | null>(null);
+    const [countDevice, setCountDevice] = useState({ totalDevices: 0, availableDevices: 0, rentedDevices: 0, maintenanceDevices: 0 })
 
     const fetchData = useCallback(async () => {
         try {
             const res = await DeviceService.getAll(new URLSearchParams({ status: statusDevice }).toString())
             if (res.status === 200) {
                 setDevices(res.data)
+
+                setCountDevice({
+                    totalDevices: res.data.length,
+                    availableDevices: res.data.filter((d: DeviceModel) => d.status === 'available').length,
+                    rentedDevices: res.data.filter((d: DeviceModel) => d.status === 'rented').length,
+                    maintenanceDevices: res.data.filter((d: DeviceModel) => d.status === 'maintenance').length,
+                })
+
             }
         } catch (error: unknown) {
             console.error("Lỗi tải thiết bị:", (error as Error).message)
@@ -257,6 +266,28 @@ function DeviceManagement() {
                     <option value="rented">Đang cho thuê</option>
                     <option value="maintenance">Bảo trì</option>
                 </select>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="p-4 bg-slate-50 rounded-lg border">
+                    <div className="text-xs text-slate-500 uppercase font-bold">Tổng số máy</div>
+                    <div className="text-2xl font-bold text-slate-900">{countDevice.totalDevices}</div>
+                </div>
+
+                <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                    <div className="text-xs text-green-600 uppercase font-bold">Đang trống</div>
+                    <div className="text-2xl font-bold text-green-700">{countDevice.availableDevices}</div>
+                </div>
+
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="text-xs text-blue-600 uppercase font-bold">Đang cho thuê</div>
+                    <div className="text-2xl font-bold text-blue-700">{countDevice.rentedDevices}</div>
+                </div>
+
+                <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <div className="text-xs text-amber-600 uppercase font-bold">Bảo trì</div>
+                    <div className="text-2xl font-bold text-amber-700">{countDevice.maintenanceDevices}</div>
+                </div>
             </div>
 
             {/* ================= TABLE ================= */}

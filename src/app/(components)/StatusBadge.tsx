@@ -7,6 +7,9 @@ const StatusBadge = ({ status }: { status: string }) => {
         deposit: { label: "Đặt cọc", class: "bg-amber-100 text-amber-700 border-amber-200 " },
         appointment: { label: "Hẹn lịch", class: "bg-green-100 text-green-700 border-green-200" },
         pending: { label: "Chờ thanh toán", class: "bg-amber-100 text-amber-700 border-amber-200" },
+        paid: { label: "Đã thanh toán", class: "bg-green-100 text-green-700 border-green-200" },
+        getDevice: { label: "Lấy máy", class: "bg-green-100 text-green-700 border-green-200" },
+        backDevice: { label: "Đến hạn trả", class: "bg-red-100 text-red-700 border-red-200" },
     };
 
     const config = configs[status as keyof typeof configs] || configs.available;

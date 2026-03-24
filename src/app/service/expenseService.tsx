@@ -11,10 +11,10 @@ export const expenseService = {
         return response.data;
     },
 
-    // update: async (id: string, data: any) => {
-    //     const response = await axios.put(`/api/expenses/${id}`, data);
-    //     return response.data;
-    // },
+    update: async (id: string, data: any) => {
+        const response = await apiClient.put(`/expense/update/${id}`, data);
+        return response.data;
+    },
 
     // delete: async (id: string) => {
     //     const response = await axios.delete(`/api/expenses/${id}`);

@@ -7,6 +7,7 @@ import DeviceManagement from '@/app/admin/DeviceManagement';
 import RentalSchedule from '@/app/admin/RentalsSchedule';
 import MenuAdmin from '@/app/admin/Menu';
 import Expenses from '@/app/admin/Expenses';
+import Customer from '@/app/admin/Customer';
 
 function AdminPage() {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -18,6 +19,7 @@ function AdminPage() {
             case 'devices': return <DeviceManagement />;
             case 'rentals': return <RentalSchedule />;
             case 'expenses': return <Expenses />;
+            case 'customers': return <Customer />;
             default: return <DashboardPage />;
         }
     };
