@@ -38,13 +38,15 @@ function Expenses() {
         status: "paid" as ExpenseStatus,
     });
 
-    // 2. Hàm lấy dữ liệu (Giả lập hoặc gọi API của bạn)
+    const totalDebt = expenses
+        .filter(item => item.status === "pending")
+        .reduce((sum, item) => sum + (item.total || 0), 0);
+
     const getAll = useCallback(async () => {
         setIsLoading(true);
         try {
             const res = await expenseService.getAll({ status: filterStatus })
             setExpenses(res)
-            console.log("Fetching expenses with status:", filterStatus);
         } catch (error) {
             toast.error("Không thể tải danh sách chi tiêu");
         } finally {
@@ -114,6 +116,15 @@ function Expenses() {
                 <Button className="w-full md:w-auto gap-2 mt-4 md:mt-0" onClick={handleOpenAdd}>
                     <Plus className="w-4 h-4" /> Thêm chi tiêu
                 </Button>
+            </div>
+
+            <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
+                <div className="text-xs font-bold text-red-600 uppercase tracking-wider">
+                    Tổng nợ
+                </div>
+                <div className="text-2xl font-black text-red-700 mt-1">
+                    {totalDebt.toLocaleString()}đ
+                </div>
             </div>
 
             <div className="flex items-center gap-3 overflow-x-auto pb-2">
