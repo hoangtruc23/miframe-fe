@@ -77,7 +77,7 @@ function RentalSchedule() {
     const [statusDevices, setStatusDevices] = useState("")
     const [selectedItem, setSelectedItem] = useState<RentalScheduleModel | null>(null)
     const [availableDevices, setAvailableDevices] = useState<DeviceModel[]>([]);
-    const [filterStatus, setFilterStatus] = useState('rented')
+    const [filterStatus, setFilterStatus] = useState('active')
     // Lưu danh sách thiết bị đang được chọn trong Form
     const [selectedDeviceList, setSelectedDeviceList] = useState<SelectedDevice[]>([])
 
@@ -308,12 +308,13 @@ function RentalSchedule() {
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
                 >
-                    <option value="">Tất cả</option>
+                    <option value="active">Hoạt động</option>
                     <option value="completed">Hoàn thành</option>
                     <option value="rented">Đang cho thuê</option>
                     <option value="deposit">Đặt cọc</option>
                     <option value="appointment">Hẹn lịch</option>
                     <option value="canceled">Đã hủy</option>
+                    <option value="">Tất cả</option>
                 </select>
             </div>
 

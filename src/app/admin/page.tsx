@@ -11,7 +11,7 @@ import Customer from '@/app/admin/Customer';
 
 function AdminPage() {
     const [activeTab, setActiveTab] = useState('dashboard');
-    const [openSidebar, setOpenSidebar] = useState(false); // Mặc định đóng trên mobile
+    const [openSidebar, setOpenSidebar] = useState(false);
 
     const renderContent = () => {
         switch (activeTab) {

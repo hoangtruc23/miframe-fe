@@ -1,31 +1,53 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, CheckCircle2, ClipboardList, TrendingUp, Badge } from "lucide-react"
+import { DollarSign, CheckCircle2, ClipboardList, TrendingUp, Badge, Calendar, Award, BarChart3 } from "lucide-react"
 import { RentalService } from '@/app/service/rentalService'
 import { toast } from 'sonner'
 import StatusBadge from '@/app/(components)/StatusBadge'
 import moment from 'moment'
+import { Progress } from '@/components/ui/progress'
+import { Input } from '@/components/ui/input'
 
 interface DashboardData {
-    allTotal: number;
-    completedTotal: number;
-    count: number;
-}
+    monthTotal: number;
+    monthActual: number;
+    yearActual: number;
+    targetPercent: string | number;
+    highestMonth: {
+        actualCollected: number;
+        total: number;
+        _id: {
+            month: number;
+        };
+    }
+};
 
 interface RentalItem {
     name: string;
     [key: string]: any;
 }
 
+const currentMonth = new Date().toISOString().slice(0, 7);
+
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData>({
-        allTotal: 0,
-        completedTotal: 0,
-        count: 0
+        monthTotal: 0,
+        monthActual: 0,
+        yearActual: 0,
+        targetPercent: 0,
+        highestMonth: {
+            actualCollected: 0,
+            total: 0,
+            _id: {
+                month: 1
+            }
+        }
     });
     const [loading, setLoading] = useState(true);
     const [listToday, setListToday] = useState<RentalItem[]>([]);
+    const [processValue, setProcessValue] = useState(0);
+    const [searchQuery, setSearchQuery] = useState(currentMonth);
 
     const getRentalToday = async () => {
         try {
@@ -36,7 +58,6 @@ export default function DashboardPage() {
             console.log(error)
         }
     }
-
 
     const renderActionBadge = (rental: any) => {
         const now = moment();
@@ -59,52 +80,63 @@ export default function DashboardPage() {
             </span>
         );
     };
-    useEffect(() => {
-        const fetchDashboard = async () => {
-            try {
-                const res = await RentalService.getDashboard();
-                setData(res.data);
-            } catch (error: any) {
-                toast.error("Không thể tải dữ liệu dashboard");
-                console.log(error)
-            } finally {
-                setLoading(false);
-            }
-        };
 
+    const fetchDashboard = async () => {
+        try {
+            console.log(searchQuery)
+            const month = searchQuery.split('-')[1];
+            const year = searchQuery.split('-')[0];
+            const res = await RentalService.getDashboard(month, year);
+            setData(res.data);
+            setProcessValue(res.data.targetPercent)
+        } catch (error: any) {
+            toast.error("Không thể tải dữ liệu dashboard");
+            console.log(error)
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         getRentalToday()
         fetchDashboard();
-    }, []);
+    }, [searchQuery]);
+
+    const formatCurrency = (value: any) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    };
 
     const stats = [
         {
-            title: "Tổng doanh thu dự kiến",
-            value: `${data.allTotal.toLocaleString()}đ`,
-            icon: <DollarSign className="h-4 w-4 text-muted-foreground" />,
-            description: "Tổng tất cả các đơn thuê",
+            title: "Doanh thu thực tế",
+            value: formatCurrency(data?.monthActual),
+            description: "Lịch đã hoàn thành",
+            icon: <BarChart3 className="h-4 w-4 text-purple-500" />,
+            color: "text-purple-600"
+        },
+        {
+            title: "Doanh thu ước tính",
+            value: formatCurrency(data?.monthTotal),
+            description: `Đạt ${data?.targetPercent}% mục tiêu`,
+            icon: <TrendingUp className="h-4 w-4 text-emerald-500" />,
+            color: "text-emerald-600"
+        },
+        {
+            title: "Tháng cao nhất",
+            // value: formatCurrency(data?.monthActual),
+            value: `Tháng ${data.highestMonth?._id.month}`,
+            description: `Kỷ lục: ${formatCurrency(data?.highestMonth?.actualCollected)}`,
+            icon: <Award className="h-4 w-4 text-amber-500" />,
+            color: "text-amber-600"
+        },
+        {
+            title: "Doanh thu năm 2026",
+            value: formatCurrency(data?.yearActual),
+            description: "Tổng thu từ đầu năm đến nay",
+            icon: <Calendar className="h-4 w-4 text-blue-500" />,
             color: "text-blue-600"
         },
-        {
-            title: "Doanh thu thực tế",
-            value: `${data.completedTotal.toLocaleString()}đ`,
-            icon: <CheckCircle2 className="h-4 w-4 text-muted-foreground" />,
-            description: "Đơn hàng đã hoàn thành",
-            color: "text-green-600"
-        },
-        {
-            title: "Tổng đơn hàng",
-            value: data.count.toString(),
-            icon: <ClipboardList className="h-4 w-4 text-muted-foreground" />,
-            description: "Số lượng lịch thuê hệ thống",
-            color: "text-orange-600"
-        },
-        {
-            title: "Tỷ lệ hoàn thành",
-            value: data.count > 0 ? `${((data.completedTotal / data.allTotal) * 100).toFixed(1)}%` : "0%",
-            icon: <TrendingUp className="h-4 w-4 text-muted-foreground" />,
-            description: "Hiệu suất thanh toán",
-            color: "text-purple-600"
-        }
+
     ];
 
     if (loading) return <div className="p-8 text-center text-slate-500">Đang tải dữ liệu...</div>;
@@ -116,7 +148,31 @@ export default function DashboardPage() {
                 <p className="text-slate-500">Tổng quan tình hình kinh doanh.</p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-3 p-4 border rounded-lg bg-card">
+                <div className="">
+                    <p className="text-sm font-medium text-muted-foreground">KPI {searchQuery}</p>
+                    <p className="text-sm font-medium text-muted-foreground">{processValue >= 100
+                        ? "🎉 Chúc mừng! Bạn đã vượt chỉ tiêu tháng."
+                        : `còn ${(100 - processValue).toFixed(2)}% nữa để hoàn thành mục tiêu.`}</p>
+
+                    <div className="flex items-center gap-2">
+                        <Progress
+                            value={processValue}
+                            className="h-2"
+                        />
+                        <span className={`text-sm font-bold ${processValue >= 100 ? 'text-emerald-500' : 'text-blue-500'}`}>
+                            {processValue}%
+                        </span>
+                    </div>
+                </div>
+                <p className="text-xs text-muted-foreground italic">
+
+                </p>
+            </div>
+
+            <Input required type="month" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {stats.map((stat, index) => (
                     <Card key={index} className="hover:shadow-md transition-shadow gap-0">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -183,10 +239,8 @@ export default function DashboardPage() {
                     )}
                 </CardContent>
             </Card>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
 
-
-
+            {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-4">
                     <CardHeader>
                         <CardTitle>Biểu đồ doanh thu</CardTitle>
@@ -197,9 +251,7 @@ export default function DashboardPage() {
                         </div>
                     </CardContent>
                 </Card>
-
-
-            </div>
+            </div> */}
         </div>
     );
 }

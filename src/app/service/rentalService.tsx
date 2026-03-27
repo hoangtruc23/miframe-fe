@@ -2,8 +2,8 @@ import apiClient from "@/app/axios/apiClient";
 
 export const RentalService = {
     urlApi: `${process.env.NEXT_PUBLIC_API_URL}/rental`,
-    async getDashboard() {
-        const res = await fetch(this.urlApi + "/dashboard")
+    async getDashboard(month: string, year: string) {
+        const res = await fetch(this.urlApi + `/dashboard?month=${month}&year=${year}`)
         if (!res.ok) {
             throw new Error("Lỗi")
         }
