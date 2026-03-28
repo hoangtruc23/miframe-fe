@@ -3,6 +3,7 @@ type CustomerModel = {
   sdt?: string;
   address?: string;
   total?: number;
+  times?: number;
   note?: string;
   status?: string;
 };

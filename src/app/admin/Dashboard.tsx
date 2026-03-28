@@ -83,14 +83,13 @@ export default function DashboardPage() {
 
     const fetchDashboard = async () => {
         try {
-            console.log(searchQuery)
             const month = searchQuery.split('-')[1];
             const year = searchQuery.split('-')[0];
             const res = await RentalService.getDashboard(month, year);
             setData(res.data);
             setProcessValue(res.data.targetPercent)
         } catch (error: any) {
-            toast.error("Không thể tải dữ liệu dashboard");
+            // toast.error("Không thể tải dữ liệu dashboard");
             console.log(error)
         } finally {
             setLoading(false);
