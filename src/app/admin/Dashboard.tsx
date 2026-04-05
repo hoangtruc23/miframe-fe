@@ -14,6 +14,7 @@ interface DashboardData {
     monthActual: number;
     yearActual: number;
     targetPercent: string | number;
+    targetTotal: string | number;
     highestMonth: {
         actualCollected: number;
         total: number;
@@ -35,6 +36,7 @@ export default function DashboardPage() {
         monthTotal: 0,
         monthActual: 0,
         yearActual: 0,
+        targetTotal: 0,
         targetPercent: 0,
         highestMonth: {
             actualCollected: 0,
@@ -76,7 +78,7 @@ export default function DashboardPage() {
 
         return (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-600 border border-slate-200">
-                ĐANG THUÊ
+                <StatusBadge status={rental.status} />
             </span>
         );
     };
@@ -116,7 +118,7 @@ export default function DashboardPage() {
         {
             title: "Doanh thu ước tính",
             value: formatCurrency(data?.monthTotal),
-            description: `Đạt ${data?.targetPercent}% mục tiêu`,
+            description: `Đạt ${data?.targetTotal}% mục tiêu`,
             icon: <TrendingUp className="h-4 w-4 text-emerald-500" />,
             color: "text-emerald-600"
         },
