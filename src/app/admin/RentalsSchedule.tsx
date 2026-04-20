@@ -290,9 +290,9 @@ function RentalSchedule() {
         }
     };
 
-    const handleSearchPhone = async(value) => {
-         const res = await RentalService.getAll(new URLSearchParams({ phone: value }).toString())
-            setRentals(res.data)
+    const handleSearchPhone = async (value: string) => {
+        const res = await RentalService.getAll(new URLSearchParams({ phone: value }).toString())
+        setRentals(res.data)
     }
 
     return (
@@ -308,7 +308,7 @@ function RentalSchedule() {
 
             <div className="md:flex items-center my-2">
                 <div className="my-2">
-                    <Input placeholder="Nhập số điện thoại" onChange={(e)=>handleSearchPhone(e.target.value)} />
+                    <Input placeholder="Nhập số điện thoại" onChange={(e) => handleSearchPhone(e.target.value)} />
                 </div>
                 <div>
                     <span className="text-sm font-medium text-gray-600 mx-2">Lọc theo trạng thái</span>
@@ -337,7 +337,7 @@ function RentalSchedule() {
 
                         <div className="grid gap-4">
                             <div className="grid grid-cols-2 gap-4">
-                                 <div className="space-y-2">
+                                <div className="space-y-2">
                                     <Label>Số điện thoại</Label>
                                     <Input value={formData.phoneCustomer} onChange={(e) => updateField('phoneCustomer', e.target.value)} />
                                 </div>
@@ -345,7 +345,7 @@ function RentalSchedule() {
                                     <Label>Tên khách hàng</Label>
                                     <Input required value={formData.nameCustomer} onChange={(e) => updateField('nameCustomer', e.target.value)} />
                                 </div>
-                               
+
                             </div>
 
                             <div className="space-y-2">

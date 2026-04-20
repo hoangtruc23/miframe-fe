@@ -36,16 +36,16 @@ function Customer() {
         setOpen(true)
     }
 
-     const handleSearchPhone = async(value) => {
-        // const res = await CustomerService.getAll(new URLSearchParams({ phone: value }).toString())
-        // setCustomers(res.data)
+    const handleSearchPhone = async (value: string) => {
+        const res = await CustomerService.getAll(new URLSearchParams({ phone: value }))
+        setCustomers(res.data)
     }
 
     return (
         <>
-        <div className="my-2">
-                    <Input placeholder="Nhập số điện thoại" onChange={(e)=>handleSearchPhone(e.target.value)} />
-                </div>
+            <div className="my-2">
+                <Input placeholder="Nhập số điện thoại" onChange={(e) => handleSearchPhone(e.target.value)} />
+            </div>
             {/* ================= TABLE ================= */}
             <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
                 {/* --- GIAO DIỆN TABLE (Chỉ hiện từ màn hình sm trở lên) --- */}
