@@ -290,6 +290,11 @@ function RentalSchedule() {
         }
     };
 
+    const handleSearchPhone = async(value) => {
+         const res = await RentalService.getAll(new URLSearchParams({ phone: value }).toString())
+            setRentals(res.data)
+    }
+
     return (
         <div className="p-6 space-y-6 bg-slate-50/50 min-h-screen">
             <div className="md:flex items-center justify-between">
@@ -301,21 +306,26 @@ function RentalSchedule() {
                 </Button>
             </div>
 
-            <div className="my-2">
-                <span className="text-sm font-medium text-gray-600 mx-2">Lọc theo trạng thái</span>
-                <select
-                    className="border rounded-lg px-3 py-2 text-sm bg-white"
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                    <option value="active">Hoạt động</option>
-                    <option value="completed">Hoàn thành</option>
-                    <option value="rented">Đang cho thuê</option>
-                    <option value="deposit">Đặt cọc</option>
-                    <option value="appointment">Hẹn lịch</option>
-                    <option value="canceled">Đã hủy</option>
-                    <option value="">Tất cả</option>
-                </select>
+            <div className="md:flex items-center my-2">
+                <div className="my-2">
+                    <Input placeholder="Nhập số điện thoại" onChange={(e)=>handleSearchPhone(e.target.value)} />
+                </div>
+                <div>
+                    <span className="text-sm font-medium text-gray-600 mx-2">Lọc theo trạng thái</span>
+                    <select
+                        className="border rounded-lg px-3 py-2 text-sm bg-white"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                        <option value="active">Hoạt động</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="rented">Đang cho thuê</option>
+                        <option value="deposit">Đặt cọc</option>
+                        <option value="appointment">Hẹn lịch</option>
+                        <option value="canceled">Đã hủy</option>
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
             </div>
 
             <Dialog open={open} onOpenChange={setOpen}>
@@ -327,14 +337,15 @@ function RentalSchedule() {
 
                         <div className="grid gap-4">
                             <div className="grid grid-cols-2 gap-4">
+                                 <div className="space-y-2">
+                                    <Label>Số điện thoại</Label>
+                                    <Input value={formData.phoneCustomer} onChange={(e) => updateField('phoneCustomer', e.target.value)} />
+                                </div>
                                 <div className="space-y-2">
                                     <Label>Tên khách hàng</Label>
                                     <Input required value={formData.nameCustomer} onChange={(e) => updateField('nameCustomer', e.target.value)} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Số điện thoại</Label>
-                                    <Input value={formData.phoneCustomer} onChange={(e) => updateField('phoneCustomer', e.target.value)} />
-                                </div>
+                               
                             </div>
 
                             <div className="space-y-2">
@@ -541,6 +552,7 @@ function RentalSchedule() {
                                     </TableCell>
                                     <TableCell>
                                         <div className="text-sm font-medium">{rental.customerId?.name || 'N/A'}</div>
+                                        <div className="text-[11px] text-slate-400 truncate max-w-37.5">{rental.customerId?.phone}</div>
                                         <div className="text-[11px] text-slate-400 truncate max-w-37.5">{rental.customerId?.note}</div>
                                     </TableCell>
                                     <TableCell className="font-bold text-blue-600">{rental.total?.toLocaleString()}đ</TableCell>

@@ -39,9 +39,9 @@ function DeviceManagement() {
             const res = await DeviceService.getAll(new URLSearchParams({ status: statusDevice }).toString())
             if (res.status === 200) {
                 setDevices(res.data)
-
+                const activeDevices = res.data.filter((d: DeviceModel) => d.status !== 'sold');
                 setCountDevice({
-                    totalDevices: res.data.length,
+                    totalDevices: activeDevices.length,
                     availableDevices: res.data.filter((d: DeviceModel) => d.status === 'available').length,
                     rentedDevices: res.data.filter((d: DeviceModel) => d.status === 'rented').length,
                     maintenanceDevices: res.data.filter((d: DeviceModel) => d.status === 'maintenance').length,
@@ -116,6 +116,17 @@ function DeviceManagement() {
         } catch (error: unknown) {
             console.error("Lỗi khi xử lý thiết bị:", (error as Error).message)
         }
+    }
+
+    const handleDelete = async (id: any) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa thiết bị này không?")) {
+            const res = await DeviceService.delete(id);
+
+            if (res.status === 200) {
+                toast.success("Cập nhật thiết bị thành công")
+                fetchData()
+            }
+        };
     }
 
     return (
@@ -233,6 +244,7 @@ function DeviceManagement() {
                                             <SelectItem value="available">Sẵn sàng</SelectItem>
                                             <SelectItem value="rented">Đang cho thuê</SelectItem>
                                             <SelectItem value="maintenance">Bảo trì</SelectItem>
+                                            <SelectItem value="sold">Đã bán</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -269,9 +281,9 @@ function DeviceManagement() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="p-4 bg-slate-50 rounded-lg border">
-                    <div className="text-xs text-slate-500 uppercase font-bold">Tổng số máy</div>
-                    <div className="text-2xl font-bold text-slate-900">{countDevice.totalDevices}</div>
+                <div className="p-4 bg-pink-50 rounded-lg border">
+                    <div className="text-xs text-pink-500 uppercase font-bold">Tổng máy hoạt động</div>
+                    <div className="text-2xl font-bold text-pink-900">{countDevice.totalDevices}</div>
                 </div>
 
                 <div className="p-4 bg-green-50 rounded-lg border border-green-100">
@@ -313,7 +325,7 @@ function DeviceManagement() {
                                         {/* <div className="font-bold text-xs">{device.code}</div> */}
                                     </TableCell>
                                     <TableCell>{device.model}</TableCell>
-                                    <TableCell className="font-medium">{device.priceRental?.toLocaleString()}đ</TableCell>
+                                    <TableCell className="font-medium">{device.priceRental}đ</TableCell>
                                     <TableCell>
                                         <StatusBadge status={device.status || ''} />
                                     </TableCell>
@@ -322,7 +334,7 @@ function DeviceManagement() {
                                     </TableCell>
                                     <TableCell className="text-right text-nowrap">
                                         <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(device)}><Edit2 className="w-4 h-4" /></Button>
-                                        <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDelete(device._id)}><Trash2 className="w-4 h-4" /></Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -342,14 +354,14 @@ function DeviceManagement() {
                                 <StatusBadge status={device.status || ''} />
                             </div>
 
-                            <div className="text-sm text-slate-500">Giá thuê: <span className="text-blue-600 font-semibold">{device.priceRental?.toLocaleString()}đ</span></div>
+                            <div className="text-sm text-slate-500">Giá thuê: <span className="text-blue-600 font-semibold">{device.priceRental}đ</span></div>
                             <div className="text-sm text-slate-500">{device.note || ''}</div>
 
                             <div className="flex gap-2 pt-2">
                                 <Button variant="outline" className="flex-1 h-9" onClick={() => handleOpenEdit(device)}>
                                     <Edit2 className="w-4 h-4 mr-2" /> Sửa
                                 </Button>
-                                <Button variant="outline" className="flex-1 h-9 text-red-500 border-red-100 bg-red-50">
+                                <Button variant="outline" className="flex-1 h-9 text-red-500 border-red-100 bg-red-50" onClick={() => handleDelete(device?._id)}>
                                     <Trash2 className="w-4 h-4 mr-2" /> Xóa
                                 </Button>
                             </div>

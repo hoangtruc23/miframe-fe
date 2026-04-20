@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Edit2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react"
+import { Input } from '@/components/ui/input'
 
 function Customer() {
     const [open, setOpen] = useState(false)
@@ -35,8 +36,16 @@ function Customer() {
         setOpen(true)
     }
 
+     const handleSearchPhone = async(value) => {
+        // const res = await CustomerService.getAll(new URLSearchParams({ phone: value }).toString())
+        // setCustomers(res.data)
+    }
+
     return (
         <>
+        <div className="my-2">
+                    <Input placeholder="Nhập số điện thoại" onChange={(e)=>handleSearchPhone(e.target.value)} />
+                </div>
             {/* ================= TABLE ================= */}
             <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
                 {/* --- GIAO DIỆN TABLE (Chỉ hiện từ màn hình sm trở lên) --- */}

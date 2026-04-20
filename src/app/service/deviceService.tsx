@@ -46,5 +46,19 @@ export const DeviceService = {
 
         return res.json()
     },
+    async delete(deviceId: string) {
+        const res = await fetch(this.urlApi + `/delete/${deviceId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+
+        if (!res.ok) {
+            throw new Error("Cập nhật máy thất bại")
+        }
+
+        return res.json()
+    },
 
 }

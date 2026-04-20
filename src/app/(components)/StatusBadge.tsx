@@ -10,6 +10,7 @@ const StatusBadge = ({ status }: { status: string }) => {
         paid: { label: "Đã thanh toán", class: "bg-green-100 text-green-700 border-green-200" },
         getDevice: { label: "Lấy máy", class: "bg-green-100 text-green-700 border-green-200" },
         backDevice: { label: "Đến hạn trả", class: "bg-red-100 text-red-700 border-red-200" },
+        sold: { label: "Đã bán", class: "bg-gray-100 text-gray-700 border-gray-200" },
     };
 
     const config = configs[status as keyof typeof configs] || configs.available;
