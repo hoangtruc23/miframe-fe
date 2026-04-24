@@ -1,6 +1,6 @@
 "use client"
 import moment from 'moment';
-import 'moment/locale/vi';
+moment.locale('vi');
 import { Button } from '@/components/ui/button'
 import {
     Dialog,

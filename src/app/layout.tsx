@@ -12,8 +12,8 @@ const alfaSlabOne = Alfa_Slab_One({
 });
 
 export const metadata: Metadata = {
-  title: "Mili",
-  description: "Cho thuê máy ảnh",
+  title: "Mili-Frame",
+  description: "Quản lý lịch thuê",
 };
 
 export default function RootLayout({
