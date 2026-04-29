@@ -1,7 +1,13 @@
 type DeviceModel = {
   _id?: string;
   name?: string;
-  model?: string;
+  modelId?: {
+    _id?: string;
+    name?: string;
+    pricePerDay?: number;
+    isForSale?: boolean;
+    isForRent?: boolean;
+  };
   code?: string;
   priceBuy?: number;
   priceSell?: number;

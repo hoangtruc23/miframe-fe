@@ -16,6 +16,14 @@ export const DeviceService = {
 
         return res.json()
     },
+    async getAllModelDevice() {
+        const res = await fetch(this.urlApi + "/getAllModelDevice")
+        if (!res.ok) {
+            throw new Error("Lấy danh sách model máy thất bại")
+        }
+
+        return res.json()
+    },
     async create(data: unknown) {
         const res = await fetch(this.urlApi + "/create", {
             method: "POST",

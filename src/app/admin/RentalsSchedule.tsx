@@ -35,8 +35,9 @@ import { toast } from 'sonner'
 import RentalScheduleModel from '@/app/Model/RentalSchedule'
 import StatusBadge from '@/app/(components)/StatusBadge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import DialogDevice from '@/app/(components)/DialogModelDevices';
 
-type RentalStatus = 'deposit' | 'appointment' | 'rented' | 'completed' | 'canceled';
+type RentalStatus = 'appointment' | 'rented' | 'completed' | 'canceled';
 
 // Định nghĩa kiểu dữ liệu cho thiết bị trong danh sách chọn
 type SelectedDevice = {
@@ -78,6 +79,8 @@ function RentalSchedule() {
     const [selectedItem, setSelectedItem] = useState<RentalScheduleModel | null>(null)
     const [availableDevices, setAvailableDevices] = useState<DeviceModel[]>([]);
     const [filterStatus, setFilterStatus] = useState('active')
+    const [filterDevice, setFilterDevice] = useState('')
+    const [filterDeviceSelected, setFilterDeviceSelected] = useState('')
     // Lưu danh sách thiết bị đang được chọn trong Form
     const [selectedDeviceList, setSelectedDeviceList] = useState<SelectedDevice[]>([])
 
@@ -88,7 +91,6 @@ function RentalSchedule() {
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     const statusConfig: Record<RentalStatus, { label: string; color: string }> = {
-        deposit: { label: "Đã cọc", color: "bg-blue-50 text-blue-700 border-blue-200" },
         appointment: { label: "Hẹn lịch", color: "bg-purple-50 text-purple-700 border-purple-200" },
         rented: { label: "Đang thuê", color: "bg-orange-50 text-orange-700 border-orange-200" },
         completed: { label: "Hoàn thành", color: "bg-green-50 text-green-700 border-green-200" },
@@ -141,18 +143,26 @@ function RentalSchedule() {
     const fetchDataRental = useCallback(async () => {
         setIsLoading(true);
         try {
-            const res = await RentalService.getAll(new URLSearchParams({ status: filterStatus }).toString())
-            setRentals(res.data)
+            console.log("Vô")
+            const params = new URLSearchParams();
+
+            if (filterStatus) params.append('status', filterStatus);
+            if (filterDeviceSelected) params.append('deviceId', filterDeviceSelected);
+
+            const res = await RentalService.getAll(params.toString());
+            setRentals(res.data);
         } catch (error) {
-            toast.error("Lỗi tải danh sách lịch thuê. Vui lòng thử lại.")
-            console.error(error)
+            toast.error("Lỗi tải danh sách lịch thuê.");
+            console.error(error);
         } finally {
             setIsLoading(false);
         }
-    }, [filterStatus])
+    }, [filterStatus, filterDeviceSelected]);
 
     const fetchDataDevices = useCallback(async () => {
         try {
+            const models = await DeviceService.getAllModelDevice();
+            setFilterDevice(models.data);
             const res = await DeviceService.getAll(new URLSearchParams({ status: statusDevices }).toString());
             setDevices(res.data);
         } catch (error) {
@@ -187,9 +197,36 @@ function RentalSchedule() {
     }, [formData.startRental, formData.endRental]);
 
     useEffect(() => {
-        fetchDataRental();
         fetchDataDevices();
-    }, [fetchDataRental, fetchDataDevices]);
+    }, []);
+
+    useEffect(() => {
+        // 1. Tạo một hàm xử lý bên trong để đảm bảo tính cô lập
+        const loadData = async () => {
+            setIsLoading(true);
+            try {
+                // Lấy dữ liệu Rental
+                const params = new URLSearchParams({
+                    status: filterStatus,
+                    ...(filterDeviceSelected && { modelDevice: filterDeviceSelected })
+                }).toString();
+                const res = await RentalService.getAll(params);
+                setRentals(res.data);
+
+                // Lấy dữ liệu Device (nếu cần thiết)
+                const deviceRes = await DeviceService.getAllModelDevice();
+                // ... xử lý kết quả
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadData();
+
+        // Chỉ chạy lại khi filterStatus hoặc filterDevice thay đổi
+    }, [filterStatus, filterDeviceSelected]);
 
     const handleOpenAdd = () => {
         setSelectedItem(null);
@@ -227,6 +264,7 @@ function RentalSchedule() {
         });
         setOpen(true);
     };
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -320,10 +358,25 @@ function RentalSchedule() {
                         <option value="active">Hoạt động</option>
                         <option value="completed">Hoàn thành</option>
                         <option value="rented">Đang cho thuê</option>
-                        <option value="deposit">Đặt cọc</option>
                         <option value="appointment">Hẹn lịch</option>
                         <option value="canceled">Đã hủy</option>
                         <option value="">Tất cả</option>
+                    </select>
+                </div>
+
+                <div>
+                    <span className="text-sm font-medium text-gray-600 mx-2">Lọc theo máy</span>
+                    <select
+                        className="border rounded-lg px-3 py-2 text-sm bg-white"
+                        value={filterDeviceSelected}
+                        onChange={(e) => setFilterDeviceSelected(e.target.value)}
+                    >
+                        <option value="">Tất cả thiết bị</option>
+                        {filterDevice && filterDevice.map((d: string, index: number) => (
+                            <option key={index} value={d}>
+                                {d}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </div>
@@ -460,6 +513,8 @@ function RentalSchedule() {
                 </DialogContent>
             </Dialog>
 
+
+
             <div className="grid grid-cols-1 gap-4 lg:hidden">
                 {isLoading ? (
                     <div className="flex justify-center py-10"><Loader2 className="w-8 h-8 animate-spin text-slate-400" /></div>
@@ -514,7 +569,8 @@ function RentalSchedule() {
                 <Table>
                     <TableHeader className="bg-slate-50">
                         <TableRow>
-                            <TableHead>Thời gian</TableHead>
+                            <TableHead>Nhận máy</TableHead>
+                            <TableHead>Trả máy</TableHead>
                             <TableHead>Thiết bị</TableHead>
                             <TableHead>Khách hàng</TableHead>
                             <TableHead>Tổng tiền</TableHead>
@@ -539,8 +595,12 @@ function RentalSchedule() {
                             rentals.map((rental: any) => (
                                 <TableRow key={rental._id}>
                                     <TableCell>
-                                        <div className="text-sm font-semibold">{moment(rental.startRental).format('HH:mm DD/MM')}</div>
-                                        <div className="text-xs text-slate-400 font-medium">đến {moment(rental.endRental).format('HH:mm DD/MM')}</div>
+                                        <div className="text-sm font-semibold">{moment(rental.startRental).format('DD/MM')}</div>
+                                        <div className="text-xs font-semibold">{moment(rental.startRental).format('HH:mm')}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="text-sm font-semibold">{moment(rental.endRental).format('DD/MM')}</div>
+                                        <div className="text-xs font-semibold">{moment(rental.endRental).format('HH:mm')}</div>
                                     </TableCell>
                                     <TableCell className="max-w-50">
                                         <div className="flex flex-wrap gap-1">

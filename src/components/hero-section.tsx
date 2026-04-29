@@ -29,16 +29,13 @@ export function HeroSection() {
                 </div>
 
                 <h1 className="my-5 font-alfa text-[60px] md:text-[150px] leading-tight text-center">
-                    MiFrame
+                    Mili.Frame
                 </h1>
 
-                <p className="font-alfa text-white bg-black p-2 md:p-3 rounded-xl text-sm md:text-base text-center">
-                    Mua bán - cho thuê máy ảnh/ action cam
-                </p>
-
-                <p className="font-alfa mt-8 md:mt-5 animate-bounce cursor-pointer">
-                    Xem thêm
-                </p>
+                <br />
+                <h1 className="my-5 text-[60px] md:text-[100px] leading-tight text-center">
+                    Quản lý lịch thuê máy.
+                </h1>
             </div>
         </div>
     )

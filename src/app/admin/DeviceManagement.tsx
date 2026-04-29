@@ -1,39 +1,37 @@
 "use client"
+
 import { Button } from '@/components/ui/button'
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Edit2, Plus, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { DeviceService } from '@/app/service/deviceService'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import DeviceModel from '@/app/Model/Device'
 import { toast } from 'sonner'
 import StatusBadge from '@/app/(components)/StatusBadge'
-
+import DialogModelDevices from '@/app/(components)/DialogModelDevices'
+import DialogDevice from '@/app/(components)/DialogDevice'
+import { modelService } from '@/app/service/modelService'
 
 function DeviceManagement() {
-    const [open, setOpen] = useState(false)
+    // --- STATE CHO DIALOG ---
+    const [openDevice, setOpenDevice] = useState(false)
+    const [openModel, setOpenModel] = useState(false)
+
+    // --- STATE CHO DATA ---
     const [devices, setDevices] = useState<DeviceModel[]>([])
     const [selectedDevice, setSelectedDevice] = useState<DeviceModel | null>(null)
-    const [statusDevice, setStatusDevice] = useState('')
-    const [formData, setFormData] = useState<DeviceModel | null>(null);
-    const [countDevice, setCountDevice] = useState({ totalDevices: 0, availableDevices: 0, rentedDevices: 0, maintenanceDevices: 0 })
+    const [selectedModel, setSelectedModel] = useState<any>(null)
+    const [listModels, setListModels] = useState<any>(null)
 
+    const [statusDevice, setStatusDevice] = useState('')
+    const [countDevice, setCountDevice] = useState({
+        totalDevices: 0,
+        availableDevices: 0,
+        rentedDevices: 0,
+        maintenanceDevices: 0
+    })
+
+    // --- FETCH DATA ---
     const fetchData = useCallback(async () => {
         try {
             const res = await DeviceService.getAll(new URLSearchParams({ status: statusDevice }).toString())
@@ -46,84 +44,75 @@ function DeviceManagement() {
                     rentedDevices: res.data.filter((d: DeviceModel) => d.status === 'rented').length,
                     maintenanceDevices: res.data.filter((d: DeviceModel) => d.status === 'maintenance').length,
                 })
-
             }
-        } catch (error: unknown) {
-            console.error("Lỗi tải thiết bị:", (error as Error).message)
-            console.log(error)
+        } catch (error: any) {
+            toast.error("Lỗi tải thiết bị: " + error.message)
         }
     }, [statusDevice])
 
+    const fetchModel = useCallback(async () => {
+        try {
+            const res = await modelService.getAll()
+            setListModels(res)
+        } catch (error: any) {
+            toast.error("Lỗi tải model thiết bị: " + error.message)
+        }
+    }, [])
+
     useEffect(() => {
         fetchData()
+        fetchModel()
     }, [fetchData])
 
-    const handleOpenCreate = () => {
+    // --- HANDLER CHO DEVICE ---
+    const handleOpenAddDevice = () => {
         setSelectedDevice(null)
-        setFormData({
-            name: '',
-            model: '',
-            code: '',
-            note: '',
-            status: '',
-            priceBuy: 0,
-            priceSell: 0,
-        })
-        setOpen(true)
+        setOpenDevice(true)
     }
 
-    const handleOpenEdit = (device: DeviceModel) => {
+    const handleEditDevice = (device: DeviceModel) => {
         setSelectedDevice(device)
-        setFormData({
-            name: device.name,
-            model: device.model,
-            code: device.code,
-            note: device.note || '',
-            status: device.status,
-            priceBuy: device.priceBuy || 0,
-            priceSell: device.priceSell || 0,
-        })
-        setOpen(true)
+        setOpenDevice(true)
     }
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
+    const handleSaveDevice = async (data: any) => {
         try {
             if (selectedDevice) {
-                // UPDATE
-                const res = await DeviceService.update(selectedDevice._id!, formData);
-
-                if (res.status === 200) {
-                    toast.success("Cập nhật thiết bị thành công")
-                    fetchData()
-                } else {
-                    toast.error(res.message)
-                    return
-                }
+                await DeviceService.update(selectedDevice._id!, data);
+                toast.success("Cập nhật thiết bị thành công")
             } else {
-                // CREATE
-                const res = await DeviceService.create(formData)
-                if (res.status === 200) {
-                    toast.success("Tạo thiết bị thành công")
-                    fetchData()
-                } else {
-                    toast.error(res.message)
-                    return
-                }
+                await DeviceService.create(data)
+                toast.success("Tạo thiết bị thành công")
             }
-
-            setOpen(false)
-        } catch (error: unknown) {
-            console.error("Lỗi khi xử lý thiết bị:", (error as Error).message)
+            fetchData()
+            setOpenDevice(false)
+        } catch (error: any) {
+            toast.error("Lỗi khi lưu thiết bị")
         }
     }
 
-    const handleDelete = async (id: any) => {
+    // --- HANDLER CHO MODEL ---
+    const handleOpenAddModel = () => {
+        setSelectedModel(null)
+        setOpenModel(true)
+    }
+
+    const handleSaveModel = async (data: any) => {
+        try {
+            console.log(data)
+            await modelService.create(data);
+            toast.success("Lưu model thành công");
+            setOpenModel(false)
+        } catch (error) {
+            toast.error("Lỗi lưu model")
+        }
+    }
+
+    const handleDelete = async (id: string) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa thiết bị này không?")) {
             const res = await DeviceService.delete(id);
-
             if (res.status === 200) {
-                toast.success("Cập nhật thiết bị thành công")
+                toast.success("Xóa thiết bị thành công")
                 fetchData()
             }
         };
@@ -131,141 +120,36 @@ function DeviceManagement() {
 
     return (
         <div>
+            {/* Header */}
             <div className="md:flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold">Quản lý thiết bị</h1>
-
-                <Button className="gap-2" onClick={handleOpenCreate}>
-                    <Plus className="w-4 h-4" />
-                    Thêm thiết bị
-                </Button>
+                <div className="flex gap-2">
+                    <Button className="gap-2" onClick={handleOpenAddModel}>
+                        <Plus className="w-4 h-4" /> Thêm model máy
+                    </Button>
+                    <Button className="gap-2" onClick={handleOpenAddDevice}>
+                        <Plus className="w-4 h-4" /> Thêm thiết bị
+                    </Button>
+                </div>
             </div>
 
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="sm:max-w-106">
-                    <form onSubmit={handleSubmit}>
-                        <DialogHeader>
-                            <DialogTitle>
-                                {selectedDevice ? "Cập nhật thiết bị" : "Thêm thiết bị"}
-                            </DialogTitle>
-                        </DialogHeader>
+            {/* Dialogs */}
+            <DialogModelDevices
+                open={openModel}
+                onOpenChange={setOpenModel}
+                initialData={selectedModel}
+                onSave={handleSaveModel}
+            />
 
-                        <div className="grid gap-4 py-6">
+            <DialogDevice
+                open={openDevice}
+                onOpenChange={setOpenDevice}
+                selectedDevice={selectedDevice}
+                onSave={handleSaveDevice}
+                listModelDevice={listModels}
+            />
 
-                            <div className="space-y-2">
-                                <Label>Tên thiết bị</Label>
-                                <Input
-                                    disabled
-                                    required
-                                    value={`${formData?.model} - ${formData?.code}`}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Dòng máy</Label>
-                                <Input
-                                    required
-                                    value={formData?.model || ''}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, model: e.target.value, name: `${e.target.value} - ${formData?.code}` })
-                                    }
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Mã máy</Label>
-                                    <Input
-                                        required
-                                        value={formData?.code || ''}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, code: e.target.value, name: `${formData?.model} - ${e.target.value}` })
-                                        }
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Giá mua</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData?.priceBuy || ''}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                priceBuy: Number(e.target.value)
-                                            })
-                                        }
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Giá thuê</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData?.priceRental || ''}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                priceRental: Number(e.target.value)
-                                            })
-
-                                        }
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Ghi chú</Label>
-                                    <Input
-                                        value={formData?.note || ''}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, note: e.target.value })
-                                        }
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Trạng thái</Label>
-
-                                    <Select
-                                        value={formData?.status || ''}
-                                        onValueChange={(value) =>
-                                            setFormData({
-                                                ...formData,
-                                                status: value,
-                                            })
-                                        }
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Chọn trạng thái" />
-                                        </SelectTrigger>
-
-                                        <SelectContent>
-                                            <SelectItem value="available">Sẵn sàng</SelectItem>
-                                            <SelectItem value="rented">Đang cho thuê</SelectItem>
-                                            <SelectItem value="maintenance">Bảo trì</SelectItem>
-                                            <SelectItem value="sold">Đã bán</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="ghost">Hủy</Button>
-                            </DialogClose>
-
-                            <Button type="submit">
-                                {selectedDevice ? "Cập nhật" : "Xác nhận tạo"}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
-
-
+            {/* Filter */}
             <div className="my-2">
                 <span className="text-sm font-medium text-gray-600 mx-2">Lọc theo trạng thái</span>
                 <select
@@ -280,93 +164,56 @@ function DeviceManagement() {
                 </select>
             </div>
 
+            {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="p-4 bg-pink-50 rounded-lg border">
-                    <div className="text-xs text-pink-500 uppercase font-bold">Tổng máy hoạt động</div>
+                    <div className="text-xs text-pink-500 uppercase font-bold">Tổng máy</div>
                     <div className="text-2xl font-bold text-pink-900">{countDevice.totalDevices}</div>
                 </div>
-
                 <div className="p-4 bg-green-50 rounded-lg border border-green-100">
                     <div className="text-xs text-green-600 uppercase font-bold">Đang trống</div>
                     <div className="text-2xl font-bold text-green-700">{countDevice.availableDevices}</div>
                 </div>
-
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                    <div className="text-xs text-blue-600 uppercase font-bold">Đang cho thuê</div>
+                    <div className="text-xs text-blue-600 uppercase font-bold">Đang thuê</div>
                     <div className="text-2xl font-bold text-blue-700">{countDevice.rentedDevices}</div>
                 </div>
-
                 <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
                     <div className="text-xs text-amber-600 uppercase font-bold">Bảo trì</div>
                     <div className="text-2xl font-bold text-amber-700">{countDevice.maintenanceDevices}</div>
                 </div>
             </div>
 
-            {/* ================= TABLE ================= */}
+            {/* Table */}
             <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-                {/* --- GIAO DIỆN TABLE (Chỉ hiện từ màn hình sm trở lên) --- */}
                 <div className="hidden md:block">
                     <Table>
                         <TableHeader className="bg-slate-50">
                             <TableRow>
-                                <TableHead>Thiết bị</TableHead>
+                                <TableHead>Tên máy</TableHead>
                                 <TableHead>Dòng máy</TableHead>
+                                <TableHead>Giá mua</TableHead>
                                 <TableHead>Giá thuê</TableHead>
                                 <TableHead>Trạng thái</TableHead>
-                                <TableHead>Ghi chú</TableHead>
                                 <TableHead className="text-right">Hành động</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {devices.map((device) => (
                                 <TableRow key={device._id}>
-                                    <TableCell>
-                                        <div className="">{device.name}</div>
-                                        {/* <div className="font-bold text-xs">{device.code}</div> */}
-                                    </TableCell>
-                                    <TableCell>{device.model}</TableCell>
-                                    <TableCell className="font-medium">{device.priceRental}đ</TableCell>
-                                    <TableCell>
-                                        <StatusBadge status={device.status || ''} />
-                                    </TableCell>
-                                    <TableCell>
-                                        {device.note}
-                                    </TableCell>
+                                    <TableCell>{device.name}</TableCell>
+                                    <TableCell>{device.modelId?.name || 'N/A'}</TableCell>
+                                    <TableCell>{device.priceBuy?.toLocaleString()}đ</TableCell>
+                                    <TableCell>{device.modelId?.pricePerDay?.toLocaleString()}đ</TableCell>
+                                    <TableCell><StatusBadge status={device.status || ''} /></TableCell>
                                     <TableCell className="text-right text-nowrap">
-                                        <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(device)}><Edit2 className="w-4 h-4" /></Button>
-                                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDelete(device._id)}><Trash2 className="w-4 h-4" /></Button>
+                                        <Button variant="ghost" size="icon" onClick={() => handleEditDevice(device)}><Edit2 className="w-4 h-4" /></Button>
+                                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDelete(device._id!)}><Trash2 className="w-4 h-4" /></Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
-                </div>
-
-                {/* --- GIAO DIỆN MOBILE CARD --- */}
-                <div className="md:hidden divide-y">
-                    {devices.map((device) => (
-                        <div key={device._id} className="p-4 space-y-2">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">{device.code}</span>
-                                    <h3 className="font-bold text-slate-900">{device.name}</h3>
-                                </div>
-                                <StatusBadge status={device.status || ''} />
-                            </div>
-
-                            <div className="text-sm text-slate-500">Giá thuê: <span className="text-blue-600 font-semibold">{device.priceRental}đ</span></div>
-                            <div className="text-sm text-slate-500">{device.note || ''}</div>
-
-                            <div className="flex gap-2 pt-2">
-                                <Button variant="outline" className="flex-1 h-9" onClick={() => handleOpenEdit(device)}>
-                                    <Edit2 className="w-4 h-4 mr-2" /> Sửa
-                                </Button>
-                                <Button variant="outline" className="flex-1 h-9 text-red-500 border-red-100 bg-red-50" onClick={() => handleDelete(device?._id)}>
-                                    <Trash2 className="w-4 h-4 mr-2" /> Xóa
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
                 </div>
             </div>
         </div>
