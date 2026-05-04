@@ -216,6 +216,33 @@ function DeviceManagement() {
                     </Table>
                 </div>
             </div>
+
+            {/* --- GIAO DIỆN MOBILE CARD --- */}
+            <div className="md:hidden divide-y">
+                {devices.map((device) => (
+                    <div key={device._id} className="p-4 space-y-2">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">{device.code}</span>
+                                <h3 className="font-bold text-slate-900">{device.name}</h3>
+                            </div>
+                            <StatusBadge status={device.status || ''} />
+                        </div>
+
+                        <div className="text-sm text-slate-500">Giá thuê: <span className="text-blue-600 font-semibold">{device.priceRental}đ</span></div>
+                        <div className="text-sm text-slate-500">{device.note || ''}</div>
+
+                        <div className="flex gap-2 pt-2">
+                            <Button variant="outline" className="flex-1 h-9" onClick={() => handleEditDevice(device)}>
+                                <Edit2 className="w-4 h-4 mr-2" /> Sửa
+                            </Button>
+                            <Button variant="outline" className="flex-1 h-9 text-red-500 border-red-100 bg-red-50" onClick={() => device._id && handleDelete(device._id)}>
+                                <Trash2 className="w-4 h-4 mr-2" /> Xóa
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     )
 }

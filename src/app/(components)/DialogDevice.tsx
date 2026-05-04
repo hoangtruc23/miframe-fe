@@ -20,8 +20,6 @@ export default function DialogDevice({ open, onOpenChange, selectedDevice, onSav
 
     // Khi open hoặc selectedDevice thay đổi, reset hoặc fill form
     useEffect(() => {
-        console.log(selectedDevice)
-        console.log(listModelDevice)
         if (open) {
             setFormData(selectedDevice || {
                 modelId: '',

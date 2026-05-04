@@ -57,6 +57,7 @@ type RentalForm = {
     nameCustomer: string
     noteCustomer: string
     phoneCustomer: string
+    depositPaid?: number // Đã chuyển khoản (nếu có)
 }
 
 const INITIAL_FORM: RentalForm = {
@@ -67,6 +68,7 @@ const INITIAL_FORM: RentalForm = {
     note: "",
     discount: 0,
     total: 0,
+    depositPaid: 0,
     nameCustomer: "",
     noteCustomer: "",
     phoneCustomer: "",
@@ -79,7 +81,7 @@ function RentalSchedule() {
     const [selectedItem, setSelectedItem] = useState<RentalScheduleModel | null>(null)
     const [availableDevices, setAvailableDevices] = useState<DeviceModel[]>([]);
     const [filterStatus, setFilterStatus] = useState('active')
-    const [filterDevice, setFilterDevice] = useState('')
+    const [filterDevice, setFilterDevice] = useState([])
     const [filterDeviceSelected, setFilterDeviceSelected] = useState('')
     // Lưu danh sách thiết bị đang được chọn trong Form
     const [selectedDeviceList, setSelectedDeviceList] = useState<SelectedDevice[]>([])
@@ -372,9 +374,9 @@ function RentalSchedule() {
                         onChange={(e) => setFilterDeviceSelected(e.target.value)}
                     >
                         <option value="">Tất cả thiết bị</option>
-                        {filterDevice && filterDevice.map((d: string, index: number) => (
-                            <option key={index} value={d}>
-                                {d}
+                        {filterDevice && filterDevice?.map((d: SelectedDevice, index: number) => (
+                            <option key={index} value={d?._id}>
+                                {d?.name}
                             </option>
                         ))}
                     </select>
@@ -493,6 +495,10 @@ function RentalSchedule() {
                             <div className="">
                                 <span className="font-bold uppercase text-xs opacity-80">Tổng cộng tạm tính {formData.total.toLocaleString()}</span>
                                 <Input type="number" value={formData.total} onChange={(e) => updateField('total', Number(e.target.value))} />
+                            </div>
+                            <div className="">
+                                <span className="font-bold uppercase text-xs opacity-80">Đã chuyển khoản</span>
+                                <Input type="number" value={formData.depositPaid} onChange={(e) => updateField('depositPaid', Number(e.target.value))} />
                             </div>
                         </div>
 
