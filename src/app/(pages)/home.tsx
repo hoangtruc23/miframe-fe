@@ -1,4 +1,4 @@
-import { HeroSection } from '@/components/hero-section'
+import { HeroSection } from '@/app/(components)/hero-section'
 import React from 'react'
 
 function HomePage() {

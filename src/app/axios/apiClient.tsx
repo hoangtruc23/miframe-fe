@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009/miframe/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'https:/manage.tiemmayanhmili.vn/miframe/api',
     timeout: 10000, // 10 giây
     headers: {
         'Content-Type': 'application/json',

@@ -213,7 +213,7 @@ export default function DashboardPage() {
                                             </span>
                                         ))}
                                     </div>
-                                    <div className="font-bold">{item.customerId.name}</div>
+                                    <div className="font-bold">{item.customerId.name} - {item.customerId.phone}</div>
                                     <div className="mt-1 space-y-0.5">
                                         <div className="flex items-center text-slate-500">
                                             <span className="font-medium">Bắt đầu: </span>
@@ -224,11 +224,6 @@ export default function DashboardPage() {
                                             <span>{moment(item.endRental).format('HH:mm DD-MM-YYYY')}</span>
                                         </div>
                                     </div>
-
-                                </div>
-
-                                <div className="font-bold">
-
                                 </div>
                             </div>
                         ))
