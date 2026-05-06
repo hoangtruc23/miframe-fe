@@ -1,6 +1,6 @@
 type CustomerModel = {
   name?: string;
-  sdt?: string;
+  phone?: string;
   address?: string;
   total?: number;
   times?: number;

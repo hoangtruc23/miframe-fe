@@ -15,9 +15,9 @@ export const expenseService = {
         const response = await apiClient.put(`/expense/update/${id}`, data);
         return response.data;
     },
-
-    // delete: async (id: string) => {
-    //     const response = await axios.delete(`/api/expenses/${id}`);
-    //     return response.data;
-    // }
+    delete: async (id: string) => {
+        // const response = await axios.delete(`/api/expenses/${id}`);
+        const response = await apiClient.delete(`/expense/delete/${id}`);
+        return response.data;
+    }
 };

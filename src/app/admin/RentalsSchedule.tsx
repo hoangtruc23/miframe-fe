@@ -34,6 +34,7 @@ import { DeviceService } from '@/app/service/deviceService'
 import { toast } from 'sonner'
 import RentalScheduleModel from '@/app/Model/RentalSchedule'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import StatusBadge from '@/app/(components)/StatusBadge';
 
 type RentalStatus = 'appointment' | 'rented' | 'completed' | 'canceled';
 
@@ -78,16 +79,16 @@ const statusConfig: Record<RentalStatus, { label: string; className: string }> =
     canceled: { label: "Đã hủy", className: "bg-red-50 text-red-800 border-red-200" },
 };
 
-function StatusBadge({ status }: { status: string }) {
-    const cfg = statusConfig[status as RentalStatus];
-    if (!cfg) return null;
-    return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${cfg.className}`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-current" />
-            {cfg.label}
-        </span>
-    );
-}
+// function StatusBadge({ status }: { status: string }) {
+//     const cfg = statusConfig[status as RentalStatus];
+//     if (!cfg) return null;
+//     return (
+//         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${cfg.className}`}>
+//             <span className="w-1.5 h-1.5 rounded-full bg-current" />
+//             {cfg.label}
+//         </span>
+//     );
+// }
 
 function StatCard({ label, value, valueClass = "" }: { label: string; value: number | string; valueClass?: string }) {
     return (
@@ -176,6 +177,10 @@ function RentalSchedule() {
     }, [statusDevices]);
 
     useEffect(() => {
+        fetchDataDevices();
+    }, []);
+
+    useEffect(() => {
         const checkAvailable = async () => {
             if (!formData.startRental || !formData.endRental) {
                 setAvailableDevices([]);
@@ -192,10 +197,6 @@ function RentalSchedule() {
         };
         checkAvailable();
     }, [formData.startRental, formData.endRental]);
-
-    useEffect(() => {
-        fetchDataDevices();
-    }, []);
 
     useEffect(() => {
         fetchDataRental();
@@ -314,14 +315,6 @@ function RentalSchedule() {
 
             {/* Filters */}
             <div className="flex flex-col md:flex-row gap-3 bg-white border border-slate-200/80 rounded-xl p-4">
-                <div className="flex-1">
-                    <label className="block text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1.5">Tìm kiếm</label>
-                    <Input
-                        className="h-9 text-sm border-slate-200"
-                        placeholder="Nhập số điện thoại..."
-                        onChange={(e) => handleSearchPhone(e.target.value)}
-                    />
-                </div>
                 <div className="w-full md:w-48">
                     <label className="block text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1.5">Trạng thái</label>
                     <select
@@ -350,6 +343,15 @@ function RentalSchedule() {
                         ))}
                     </select>
                 </div>
+                <div className="flex-1">
+                    <label className="block text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1.5">Tìm kiếm</label>
+                    <Input
+                        className="h-9 text-sm border-slate-200"
+                        placeholder="Nhập số điện thoại..."
+                        onChange={(e) => handleSearchPhone(e.target.value)}
+                    />
+                </div>
+
             </div>
 
             {/* Dialog Form */}

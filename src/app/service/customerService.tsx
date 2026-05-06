@@ -5,4 +5,8 @@ export const CustomerService = {
         const response = await apiClient.get('/customers/getAll', { params });
         return response.data;
     },
+    update: async (id: string, params?: any) => {
+        const response = await apiClient.get('/customers/getAll', { params });
+        return response.data;
+    },
 }

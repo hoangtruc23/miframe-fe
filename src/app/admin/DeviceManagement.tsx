@@ -11,6 +11,13 @@ import StatusBadge from '@/app/(components)/StatusBadge'
 import DialogModelDevices from '@/app/(components)/DialogModelDevices'
 import DialogDevice from '@/app/(components)/DialogDevice'
 import { modelService } from '@/app/service/modelService'
+import { Input } from '@/components/ui/input'
+
+type SelectedDevice = {
+    _id: string;
+    name: string;
+    priceRental: number;
+}
 
 function DeviceManagement() {
     // --- STATE CHO DIALOG ---
@@ -23,6 +30,9 @@ function DeviceManagement() {
     const [selectedModel, setSelectedModel] = useState<any>(null)
     const [listModels, setListModels] = useState<any>(null)
 
+    const [filterDevice, setFilterDevice] = useState([])
+    const [filterDeviceSelected, setFilterDeviceSelected] = useState('')
+
     const [statusDevice, setStatusDevice] = useState('')
     const [countDevice, setCountDevice] = useState({
         totalDevices: 0,
@@ -34,7 +44,13 @@ function DeviceManagement() {
     // --- FETCH DATA ---
     const fetchData = useCallback(async () => {
         try {
-            const res = await DeviceService.getAll(new URLSearchParams({ status: statusDevice }).toString())
+            const params = new URLSearchParams({
+                status: statusDevice,
+                ...(filterDeviceSelected && { modelDevice: filterDeviceSelected })
+            }).toString();
+            const res = await DeviceService.getAll(params);
+
+            // const res = await DeviceService.getAll(new URLSearchParams({ status: statusDevice }).toString())
             if (res.status === 200) {
                 setDevices(res.data)
                 const activeDevices = res.data.filter((d: DeviceModel) => d.status !== 'sold');
@@ -48,7 +64,7 @@ function DeviceManagement() {
         } catch (error: any) {
             toast.error("Lỗi tải thiết bị: " + error.message)
         }
-    }, [statusDevice])
+    }, [statusDevice, filterDeviceSelected])
 
     const fetchModel = useCallback(async () => {
         try {
@@ -63,6 +79,22 @@ function DeviceManagement() {
         fetchData()
         fetchModel()
     }, [fetchData])
+
+    const fetchDataDevices = useCallback(async () => {
+        try {
+            const models = await DeviceService.getAllModelDevice();
+            setFilterDevice(models.data);
+            const res = await DeviceService.getAll(new URLSearchParams({ status: statusDevice }).toString());
+            setDevices(res.data);
+        } catch (error) {
+            toast.error("Lỗi tải thiết bị");
+            console.error(error);
+        }
+    }, [statusDevice]);
+
+    useEffect(() => {
+        fetchDataDevices();
+    }, []);
 
     // --- HANDLER CHO DEVICE ---
     const handleOpenAddDevice = () => {
@@ -149,23 +181,9 @@ function DeviceManagement() {
                 listModelDevice={listModels}
             />
 
-            {/* Filter */}
-            <div className="my-2">
-                <span className="text-sm font-medium text-gray-600 mx-2">Lọc theo trạng thái</span>
-                <select
-                    className="border rounded-lg px-3 py-2 text-sm bg-white"
-                    value={statusDevice}
-                    onChange={(e) => setStatusDevice(e.target.value)}
-                >
-                    <option value="">Tất cả</option>
-                    <option value="available">Sẵn sàng</option>
-                    <option value="rented">Đang cho thuê</option>
-                    <option value="maintenance">Bảo trì</option>
-                </select>
-            </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-pink-50 rounded-lg border">
                     <div className="text-xs text-pink-500 uppercase font-bold">Tổng máy</div>
                     <div className="text-2xl font-bold text-pink-900">{countDevice.totalDevices}</div>
@@ -183,6 +201,47 @@ function DeviceManagement() {
                     <div className="text-2xl font-bold text-amber-700">{countDevice.maintenanceDevices}</div>
                 </div>
             </div>
+
+            {/* Filter */}
+            <div className="flex flex-col md:flex-row gap-3 bg-white border border-slate-200/80 rounded-xl p-4 my-3">
+                <div className="w-full md:w-56">
+                    <label className="block text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1.5">Trạng thái</label>
+                    <select
+                        className="w-full h-9 border border-slate-200 rounded-lg px-3 text-sm bg-white text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all cursor-pointer"
+                        value={statusDevice}
+                        onChange={(e) => setStatusDevice(e.target.value)}
+                    >
+                        <option value="">Tất cả</option>
+                        <option value="available">Sẵn sàng</option>
+                        <option value="rented">Đang cho thuê</option>
+                        <option value="maintenance">Bảo trì</option>
+                    </select>
+                </div>
+                <div className="w-full md:w-56">
+                    <label className="block text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1.5">Thiết bị</label>
+                    <select
+                        className="w-full h-9 border border-slate-200 rounded-lg px-3 text-sm bg-white text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all cursor-pointer"
+                        value={filterDeviceSelected}
+                        onChange={(e) => setFilterDeviceSelected(e.target.value)}
+                    >
+                        <option value="">Tất cả thiết bị</option>
+                        {filterDevice && filterDevice.map((d: SelectedDevice, i: number) => (
+                            <option key={i} value={d?._id}>{d?.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="flex-1">
+                    <label className="block text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1.5">Tìm kiếm</label>
+                    <Input
+                        className="h-9 text-sm border-slate-200"
+                        placeholder="Nhập số 4 số cuối SN ..."
+                    // onChange={(e) => handleSearchPhone(e.target.value)}
+                    />
+                </div>
+
+            </div>
+
 
             {/* Table */}
             <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
